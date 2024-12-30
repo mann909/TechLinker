@@ -64,10 +64,11 @@ export const registerCandidate = async(req, res) => {
 
         req=matchedData(req)
         const { fullName, email, mobile, password , otp} = req;
-
+        console.log(email)
         const verification = await Verifications.findOne({
-            email: req.email,
+            email
           }).lean()
+          console.log(verification)
           if (!verification) {
             throw buildErrorObject(
               StatusCodes.NOT_FOUND,
@@ -104,7 +105,7 @@ export const registerCandidate = async(req, res) => {
         // const emailTemplate = generateCandidateEmail(fullName, email, mobile);
         // await mailSender.sendEmail(email, "Candidate Registration Confirmation", emailTemplate);
 
-        res
+        return res
             .status(StatusCodes.CREATED)
             .json(buildResponse(StatusCodes.CREATED ,{message:'Candidate Registered'}))
 

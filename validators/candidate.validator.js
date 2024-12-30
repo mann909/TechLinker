@@ -18,8 +18,7 @@ export const validateRegister = [
     .isEmpty()
     .withMessage('Email is Required') 
     .isEmail()
-    .withMessage('Email is not valid')
-    .normalizeEmail(),
+    .withMessage('Email is not valid'),
 
     check('password')
     .exists()
@@ -72,8 +71,7 @@ export const validateLogin=[
     .isEmpty()
     .withMessage('Email is Required') 
     .isEmail()
-    .withMessage('Email is not valid')
-    .normalizeEmail() ,
+    .withMessage('Email is not valid'),
 
     check('password')
     .exists()
@@ -81,8 +79,6 @@ export const validateLogin=[
     .not()
     .isEmpty()
     .withMessage('Password  Required') ,
-
-
 
     (req , res , next)=>validateRequest(req , res , next)
 

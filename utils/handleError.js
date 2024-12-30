@@ -2,6 +2,8 @@ const handleError = (res, err) => {
     if (process.env.NODE_ENV === 'development') {
       console.log(err)
     }
+
+    console.log(err)
   
     const response = {
       success: false,
@@ -16,7 +18,7 @@ const handleError = (res, err) => {
       response.code = err.code
     }
   
-    res.status(response.code).json(response)
+    return res.status(response.code).json(response)
   }
   
   export default handleError
