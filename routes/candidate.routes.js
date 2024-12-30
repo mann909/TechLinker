@@ -7,12 +7,12 @@ import auth from '../middlewares/auth.middleware.js'
 import trimRequest from 'trim-request';
 
 const uploadMiddleware = upload.fields([
-  { name: 'panCardFile', maxCount: 1 },
-  { name: 'drivingLicenseFile', maxCount: 1 },
-  { name: 'passPortFile', maxCount: 1 },
-  { name: 'resumeFile', maxCount: 1 }
-]);
-
+    { name: 'panCardFile', maxCount: 1 },
+    { name: 'drivingLicenseFile', maxCount: 1 },
+    { name: 'passPortFile', maxCount: 1 },
+    { name: 'resumeFile', maxCount: 1 }
+  ]);
+  
 
 router.post(
     '/register' ,

@@ -86,3 +86,6 @@
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/api/v1/employer/register\",\"status\":\"404\",\"responseTime\":\"113.776\"}","timestamp":"2024-12-30T06:13:34.188Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/api/v1/employer/register\",\"status\":\"422\",\"responseTime\":\"7.407\"}","timestamp":"2024-12-30T06:16:24.116Z"}
 {"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/api/v1/employer/register\",\"status\":\"404\",\"responseTime\":\"74.099\"}","timestamp":"2024-12-30T06:16:31.835Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/api/v1/candidate/login\",\"status\":\"202\",\"responseTime\":\"251.657\"}","timestamp":"2024-12-30T06:44:36.048Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/api/v1/candidate/update-profile\",\"status\":\"200\",\"responseTime\":\"4192.645\"}","timestamp":"2024-12-30T06:45:42.560Z"}
+{"level":"\u001b[32minfo\u001b[39m","message":"{\"method\":\"POST\",\"url\":\"/api/v1/candidate/update-profile\",\"status\":\"200\",\"responseTime\":\"7766.810\"}","timestamp":"2024-12-30T06:46:07.023Z"}

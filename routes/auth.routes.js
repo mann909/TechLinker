@@ -6,6 +6,20 @@ import trimRequest from 'trim-request'
 
 const router = express.Router()
 
+
+
+
+router.get('/verify-token', 
+    authController.verifyToken
+);
+
+
+router.delete(
+    '/logout' ,
+    authController.logOut
+)
+
+
 router.post(
     '/send-otp', 
     trimRequest.all,

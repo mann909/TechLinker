@@ -52,3 +52,53 @@ export const sendOtp = async(req , res)=>{
 }
 
 
+
+
+
+
+export const verifyToken = async (req, res) => {
+  try {
+    const { accessToken, refreshToken } = req.cookies;
+    console.log(req.cookies);
+
+    if (!accessToken || !refreshToken) {
+      throw buildErrorObject(StatusCodes.UNAUTHORIZED, 'Session Expired');
+    }
+
+    console.log(process.env.AUTH_SECRET);
+    const decoded = jwt.verify(accessToken, process.env.AUTH_SECRET);
+    const id = decoded._id;
+
+    const user = await Admin.findById(id).select('-password').lean();
+    if (!user) {
+      throw buildErrorObject(StatusCodes.UNAUTHORIZED, 'Session Expired');
+    }
+
+    res
+      .status(StatusCodes.ACCEPTED)
+      .json(buildResponse(StatusCodes.ACCEPTED, { user }));
+  } catch (err) {
+    console.log(err);
+    handleError(res, err);
+  }
+};
+
+
+export const logOut = async(req , res)=>{
+    try{
+
+        res.
+           clearCookie('accessToken' , {httpOnly:true , secure:false})
+        res.
+           clearCookie('refreshToken' , {httpOnly:true , secure:false})
+
+
+           res.status(StatusCodes.NOT_MODIFIED).send()
+
+    }catch(err){
+        buildErrorObject(res , err)
+
+    }
+}
+
+
