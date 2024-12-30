@@ -4,11 +4,15 @@ import buildErrorObject from '../utils/buildErrorObject.js'
 import handleError from '../utils/handleError.js'
 import bcrypt from 'bcrypt'
 import buildResponse from '../utils/buildResponse.js'
+import Verifications from '../model/Verifications.schema.js'
+import { matchedData } from 'express-validator'
 
 export const registerEmployer = async(req , res)=>{
     try{
 
-        const {orgName , city , state , mobile , website , about , email , password} = req.body
+        req = matchedData(req)
+
+        const {orgName , city , state , mobile , website , about , email , password , otp} = req
 
         const existingOrganisation = await Employer.findOne({
             $or: [
@@ -16,6 +20,25 @@ export const registerEmployer = async(req , res)=>{
             { mobile: mobile }
             ]
         })
+
+
+
+        const verification = await Verifications.findOne({
+            email: req.email,
+          }).lean()
+          if (!verification) {
+            throw buildErrorObject(
+              StatusCodes.NOT_FOUND,
+              'Verification record not found. Please request a new OTP.'
+            )
+          }
+      
+          if (parseInt(verification.otp) !== parseInt(otp)) {
+            throw buildErrorObject(
+                StatusCodes.BAD_REQUEST,
+              'Invalid OTP. Please enter the correct OTP sent to your email.'
+            )
+          }
 
 
 
@@ -45,8 +68,6 @@ export const registerEmployer = async(req , res)=>{
 
        res.status(StatusCodes.CREATED).json(buildResponse(StatusCodes.CREATED , {employer}))
 
-
-
     }catch(err){
         handleError(res , err)
 
@@ -57,7 +78,9 @@ export const registerEmployer = async(req , res)=>{
 
 export const loginEmployer = async(req , res)=>{
     try{
-        const {email , password}= req.body ;
+
+        req = matchedData(req)
+        const {email , password}= req ;
         if(!email || !password){
            throw buildErrorObject(StatusCodes.BAD_REQUEST , 'Missing Parameters')
         }

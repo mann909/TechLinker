@@ -53,6 +53,11 @@ const EmployerSchema = new mongoose.Schema({
         type:String ,
         enum:['Candidate' , 'Employer'] ,
         default:'Employer'
+    } ,
+    status:{
+        type:String ,
+        default:'pending' ,
+        enum:['pending' ,'approved' ,'rejected']
     }
   
 } ,  {timestamps:true} )

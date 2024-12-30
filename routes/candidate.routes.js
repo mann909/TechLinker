@@ -1,8 +1,10 @@
 import express from 'express'
 const router = express.Router()
 import * as candidateController from '../controller/Candidate.controller.js';
+import *  as candidateValidators from '../validators/candidate.validator.js'
 import {upload} from '../config/cloudinary.js'
 import auth from '../middlewares/auth.middleware.js'
+import trimRequest from 'trim-request';
 
 const uploadMiddleware = upload.fields([
   { name: 'panCardFile', maxCount: 1 },
@@ -14,12 +16,16 @@ const uploadMiddleware = upload.fields([
 
 router.post(
     '/register' ,
+    trimRequest.all ,
+    candidateValidators.validateRegister ,
     candidateController.registerCandidate
 
 )
 
 router.post(
     '/login' , 
+    trimRequest.all ,
+    candidateValidators.validateLogin ,
     candidateController.loginCandidate
     
 )

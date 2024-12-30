@@ -4,6 +4,7 @@ import buildErrorObject from '../utils/buildErrorObject.js'
 import { StatusCodes } from 'http-status-codes'
 import buildResponse from '../utils/buildResponse.js'
 import handleError from '../utils/handleError.js'
+import { matchedData } from 'express-validator'
 
 
 
@@ -11,12 +12,19 @@ import handleError from '../utils/handleError.js'
 export const listJob = async(req , res)=>{
     try{
 
-        const {post , payroll , qualifications ,openings,  description , employmentType , hiringProcess }=req.body
+        req= matchedData(req)
+
+        const {post , payroll , qualifications ,openings,  description , employmentType , hiringProcess }=req
 
         const organisationId = req.user.id
         const employer = await Employer.findById(organisationId)
         if(!employer){
             throw buildErrorObject(StatusCodes.BAD_REQUEST , 'No Organisation Found')
+        }
+
+        if(employer.status!=='approved'){
+            throw buildErrorObject(StatusCodes.UNAUTHORIZED , 'You are Unauthorized')
+
         }
 
         if( !post || !payroll ||  !qualifications || !openings ||  !description || !employmentType || !hiringProcess){

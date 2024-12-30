@@ -7,13 +7,13 @@ import bcrypt from 'bcrypt'
 import generateTokens from '../utils/generateTokens.js';
 import Profile from '../model/Profile.schema.js';
 import {uploadToCloudinary}  from '../config/cloudinary.js'
+import { matchedData } from 'express-validator';
+import Verifications from '../model/Verifications.schema.js'
 
 export const loginCandidate =async(req , res)=>{
     try{
-        const {email , password}= req.body ;
-        if(!email || !password){
-           throw buildErrorObject(StatusCodes.BAD_REQUEST , 'Missing Parameters')
-        }
+        const {email , password}= matchedData(req) ;
+      
 
         let candidate = await Candidate.findOne({email:email}).select('+password')
 
@@ -61,12 +61,28 @@ export const loginCandidate =async(req , res)=>{
 
 export const registerCandidate = async(req, res) => {
     try {
-        const { fullName, email, mobile, password } = req.body;
 
-        if (!fullName || !email || !mobile || !password) {
-            throw buildErrorObject(StatusCodes.BAD_REQUEST, 'Missing Parameters')
-        }
+        req=matchedData(req)
+        const { fullName, email, mobile, password , otp} = req;
 
+        const verification = await Verifications.findOne({
+            email: req.email,
+          }).lean()
+          if (!verification) {
+            throw buildErrorObject(
+              StatusCodes.NOT_FOUND,
+              'Verification record not found. Please request a new OTP.'
+            )
+          }
+      
+          if (parseInt(verification.otp) !== parseInt(otp)) {
+            throw buildErrorObject(
+                StatusCodes.BAD_REQUEST,
+              'Invalid OTP. Please enter the correct OTP sent to your email.'
+            )
+          }
+
+    
         const candidateExists = await Candidate.findOne({ email });
         if (candidateExists) {
             throw buildErrorObject(StatusCodes.CONFLICT, 'Candidate Already Exists')
