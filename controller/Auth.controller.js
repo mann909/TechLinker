@@ -5,6 +5,8 @@ import otpGenerator  from 'otp-generator';
 import { matchedData } from 'express-validator';
 import sendMail from '../helpers/sendMail.js';
 import Verifications from '../model/Verifications.schema.js'
+import handleError from '../utils/handleError.js';
+
 
 
 
@@ -46,7 +48,7 @@ export const sendOtp = async(req , res)=>{
 
 
     }catch(err){
-      buildErrorObject(res , err)
+      handleError(res , err)
 
     }
 }
@@ -96,7 +98,7 @@ export const logOut = async(req , res)=>{
            res.status(StatusCodes.NOT_MODIFIED).send()
 
     }catch(err){
-        buildErrorObject(res , err)
+        handleError(res , err)
 
     }
 }
