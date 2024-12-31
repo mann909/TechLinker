@@ -15,6 +15,14 @@ router.post(
 
 )
 
+router.get(
+    '/get-jobs' ,
+    auth ,
+    trimRequest.all ,
+    jobValidator.validateJobSearch ,
+    jobController.searchJobs
+)
+
 
 
 

@@ -30,7 +30,8 @@ export const loginCandidate =async(req , res)=>{
         }
         const user={
             id:candidate._id ,
-            role:candidate.role
+            role:candidate.role,
+            name:candidate.fullName
         }
 
         const {accessToken , refreshToken} = generateTokens(user)
@@ -114,15 +115,16 @@ export const registerCandidate = async(req, res) => {
     }
 }
 
-
-
-
-
-
+//this code wont update the user's fullName and mobile number (since email is unchangeable)
 export const updateProfile = async (req, res) => {
     try {
         const { id } = req.user;
         const {
+            //Candidate
+            fullName,
+            mobile,
+
+            //Profile
             subLocation,
             maritalStatus,
             dob,
@@ -196,23 +198,122 @@ export const updateProfile = async (req, res) => {
             prefferedLocation
         };
 
+        const candidateData = {
+            fullName,
+            mobile,
+        }
+
         const filteredProfileData = Object.fromEntries(
             Object.entries(profileData).filter(([_, value]) => value != null)
         );
+
+        if (Object.keys(filteredProfileData).length > 0) {
+            filteredProfileData.isProfileCompleted = true;
+        }
+
+        const filteredCandidateData = Object.fromEntries(
+            Object.entries(candidateData).filter(([_, value]) => value != null)
+        )
+
+
 
         const updatedProfile = await Profile.findOneAndUpdate(
             { userId:id },
             filteredProfileData,
             { new: true } ,
             {upsert:true}
-        );
+        ).lean();
+
+        const updatedCandidate = await Candidate.findByIdAndUpdate(
+            id,
+            filteredCandidateData,
+            { new: true } ,
+        ).lean()
 
         res
             .status(StatusCodes.OK)
-            .json(buildResponse(StatusCodes.OK, {candidate:updatedProfile}));
+            .json(buildResponse(StatusCodes.OK, 
+                {candidate:
+                    {...updatedProfile,
+                        fullName:updatedCandidate.fullName,
+                        mobile:updatedCandidate.mobile,
+                    }
+                })
+            );
 
     } catch (err) {
         console.log(err)
         handleError(res, err);
     }
 }
+
+export const getProfile = async (req,res)=>{
+    try {
+        const { id } = req.user
+
+        const profile = await Candidate.findById(id).populate('profile')
+
+        res
+        .status(StatusCodes.OK)
+        .json(buildResponse(StatusCodes.OK, profile));
+
+    } catch (err) {
+        console.log(err)
+        handleError(res, err);
+    }
+
+}
+
+
+
+
+// extra code
+
+// const requiredFields = [
+//     'subLocation',
+//     'maritalStatus',
+//     'dob',
+//     'gender',
+//     'language',
+//     'englishFluency',
+//     'currentAddress',
+//     'permanentAddress',
+//     'workExperience',
+//     'currentCompany',
+//     'previousCompany',
+//     'course',
+//     'passingYear',
+//     'marks',
+//     'role',
+//     'subRole',
+//     'industry',
+//     'jobType',
+//     'prefferedLocation'
+// ];
+
+// const allFieldsFilled = requiredFields.every(field => profileData[field] != null && profileData[field] !== '');
+
+// const documentFields = [
+//     {
+//     number: profileData.panCardNumber,
+//     file: profileData.panCardFile
+//     },
+//     {
+//     number: profileData.drivingLicenseNumber,
+//     file: profileData.drivingLicenseFile
+//     },
+//     {
+//     number: profileData.passPortNumber,
+//     file: profileData.passPortFile
+//     }
+// ];
+
+
+
+// const atLeastOneDocumentPresent = documentFields.some(field => field.number != null && field.number !== '' && field.file != null && field.file !== '');
+
+// if (!allFieldsFilled || !atLeastOneDocumentPresent) {
+//     throw buildErrorObject(StatusCodes.BAD_REQUEST, 'All required fields must be filled and at least one document must be present');
+// }else{
+//     profileData.isProfileCompleted = true
+// }

@@ -89,6 +89,10 @@ const JobProfile = new mongoose.Schema({
   } ,
   prefferedLocation:{
    type:String
+  },
+  isProfileCompleted:{
+   type:Boolean ,
+   default:false
   }
 
 

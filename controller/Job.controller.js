@@ -60,3 +60,88 @@ export const listJob = async(req , res)=>{
 
     }
 }
+
+
+
+
+
+export const searchJobs = async (req, res) => {
+  try {
+    // Extract validated query parameters
+    const queryData = matchedData(req);
+    const { hiringProcess, post, qualification, employmentType, city, search, state } = queryData;
+
+    // Base match filter for JobModel
+    const matchFilter = {
+      isApproved: true,
+    };
+
+    // Dynamically add filters based on query parameters
+    if (post) matchFilter.post = { $regex: post, $options: "i" };
+    if (qualification) matchFilter.qualifications = { $regex: qualification, $options: "i" };
+    if (employmentType) matchFilter.employmentType = { $regex: employmentType, $options: "i" };
+    if (hiringProcess) matchFilter.hiringProcess = { $regex: hiringProcess, $options: "i" };
+
+    // Search filter for description and organisation name
+    const searchFilter = [];
+    if (search) {
+      searchFilter.push(
+        { description: { $regex: search, $options: "i" } },
+        { "organisationDetails.orgName": { $regex: search, $options: "i" } }
+      );
+    }
+
+    // Aggregation pipeline
+    const pipeline = [
+      {
+        $lookup: {
+          from: "employers", // Replace with the actual employers collection name
+          localField: "organisation",
+          foreignField: "_id",
+          as: "organisationDetails",
+        },
+      },
+      {
+        $unwind: "$organisationDetails", // Flatten the joined array
+      },
+      {
+        $match: {
+          ...matchFilter,
+          ...(city && { "organisationDetails.city": { $regex: city, $options: "i" } }),
+          ...(state && { "organisationDetails.state": { $regex: state, $options: "i" } }),
+          ...(searchFilter.length && { $or: searchFilter }),
+        },
+      },
+      {
+        $project: {
+          post: 1,
+          payroll: 1,
+          qualifications: 1,
+          openings: 1,
+          description: 1,
+          employmentType: 1,
+          hiringProcess: 1,
+          isApproved: 1,
+          "organisationDetails.orgName": 1,
+          "organisationDetails.city": 1,
+          "organisationDetails.state": 1,
+        },
+      },
+    ];
+
+    // Execute the aggregation pipeline
+    const jobs = await Job.aggregate(pipeline);
+
+    if (!jobs.length) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: "No jobs found matching the criteria.",
+      });
+    }
+
+    // Return the response
+    res.status(StatusCodes.OK).json(buildResponse(StatusCodes.OK, { jobs }));
+  } catch (err) {
+    handleError(res, err);
+  }
+};

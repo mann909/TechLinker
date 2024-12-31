@@ -4,3 +4,7 @@ node_modules
 .env
 
 /.env
+
+app.log
+./app.log
+/app.log

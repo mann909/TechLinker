@@ -3,8 +3,6 @@ const handleError = (res, err) => {
       console.log(err)
     }
 
-    console.log(err)
-  
     const response = {
       success: false,
       code: 500,
@@ -17,8 +15,8 @@ const handleError = (res, err) => {
     if (err?.code <= 500) {
       response.code = err.code
     }
-  
-    return res.status(response.code).json(response)
+
+    return res.status(response.code||500).json(response)
   }
   
   export default handleError
