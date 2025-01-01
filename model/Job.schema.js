@@ -27,10 +27,11 @@ const JobModel = new mongoose.Schema({
     } ,
     employmentType:{
         type:String , 
-        required:true
+        required:true,
+        enum:['Full Time' , 'Part Time']
     } ,
     hiringProcess:{
-        type:String ,
+        type:String , 
         enum:['Walk In'  , 'Online'] ,
         required:true
     } ,

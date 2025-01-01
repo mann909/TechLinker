@@ -91,24 +91,36 @@ export const searchJobs = async (req, res) => {
       );
     }
 
+    console.log(city,state)
+
     // Aggregation pipeline
     const pipeline = [
       {
         $lookup: {
-          from: "employers", // Replace with the actual employers collection name
+          from: "employers",
           localField: "organisation",
           foreignField: "_id",
           as: "organisationDetails",
         },
       },
       {
-        $unwind: "$organisationDetails", // Flatten the joined array
+        $unwind: "$organisationDetails",
       },
       {
         $match: {
           ...matchFilter,
-          ...(city && { "organisationDetails.city": { $regex: city, $options: "i" } }),
-          ...(state && { "organisationDetails.state": { $regex: state, $options: "i" } }),
+          ...(city && state
+            ? {
+                $and: [
+                  { "organisationDetails.city": { $regex: city, $options: "i" } },
+                  { "organisationDetails.state": { $regex: state, $options: "i" } },
+                ],
+              }
+            : city
+            ? { "organisationDetails.city": { $regex: city, $options: "i" } }
+            : state
+            ? { "organisationDetails.state": { $regex: state, $options: "i" } }
+            : {}),
           ...(searchFilter.length && { $or: searchFilter }),
         },
       },
@@ -122,6 +134,7 @@ export const searchJobs = async (req, res) => {
           employmentType: 1,
           hiringProcess: 1,
           isApproved: 1,
+          createdAt:1,
           "organisationDetails.orgName": 1,
           "organisationDetails.city": 1,
           "organisationDetails.state": 1,
@@ -131,13 +144,6 @@ export const searchJobs = async (req, res) => {
 
     // Execute the aggregation pipeline
     const jobs = await Job.aggregate(pipeline);
-
-    if (!jobs.length) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        success: false,
-        message: "No jobs found matching the criteria.",
-      });
-    }
 
     // Return the response
     res.status(StatusCodes.OK).json(buildResponse(StatusCodes.OK, { jobs }));

@@ -10,8 +10,8 @@ export const validateLogin=[
     .isEmpty()
     .withMessage('Email is Required') 
     .isEmail()
-    .withMessage('Email is not valid')
-    .normalizeEmail() ,
+    .withMessage('Email is not valid') ,
+    
 
     check('password')
     .exists()
@@ -27,9 +27,6 @@ export const validateLogin=[
 
 ]
 
-
-
-
 export const validateRegister = [
 
 
@@ -40,8 +37,7 @@ export const validateRegister = [
     .isEmpty()
     .withMessage('Email is Required') 
     .isEmail()
-    .withMessage('Email is not valid')
-    .normalizeEmail(),
+    .withMessage('Email is not valid'),
 
 
     check('otp')
@@ -50,7 +46,7 @@ export const validateRegister = [
     .not()
     .isEmpty() 
     .isLength({ min: 4, max: 4 })
-    .withMessage('OTP must be exactly 10 digits')
+    .withMessage('OTP must be exactly 4 digits')
     .matches(/^[0-9]+$/)
     .withMessage('OTP must contain only numbers'),
 
@@ -130,4 +126,68 @@ export const validateRegister = [
     (req , res , next) =>validateRequest(req , res , next)
     
 
+]
+
+export const validateGetEmployerProfile = [
+    (req , res , next) =>validateRequest(req , res , next)
+]
+
+export const validateUpdateEmployerProfile = [
+    check('orgName')
+        .exists()
+        .withMessage('Organisation Name is Required')
+        .not()
+        .isEmpty()
+        .withMessage('Organisation Name is Required'),
+
+    check('city')
+        .exists()
+        .withMessage('City is Required')
+        .not()
+        .isEmpty()
+        .withMessage('City is Required'),
+
+    check('state')
+        .exists()
+        .withMessage('State is Required')
+        .not()
+        .isEmpty()
+        .withMessage('State is Required'),
+
+    check('mobile')
+        .exists()
+        .withMessage('Mobile Number is Required')
+        .not()
+        .isEmpty()
+        .withMessage('Mobile Number is Required')
+        .isLength({ min: 10, max: 10 })
+        .withMessage('Mobile number must be exactly 10 digits')
+        .matches(/^[0-9]+$/)
+        .withMessage('Mobile number must contain only numbers'),
+
+    check('email')
+        .exists()
+        .withMessage('Email is Required')
+        .not()
+        .isEmpty()
+        .withMessage('Email is Required')
+        .isEmail()
+        .withMessage('Invalid email format'),
+
+    check('website')
+        .exists()
+        .withMessage('Website is Required')
+        .not()
+        .isEmpty()
+        .withMessage('Website is Required')
+        .matches(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/)
+        .withMessage('Invalid website URL'),
+
+    check('about')
+        .exists()
+        .withMessage('About is Required')
+        .not()
+        .isEmpty()
+        .withMessage('About is Required'),
+    (req , res , next) =>validateRequest(req , res , next)
 ]

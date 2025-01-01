@@ -35,7 +35,8 @@ const EmployerSchema = new mongoose.Schema({
     } ,
     password:{
         type:String ,
-        required:true
+        required:true,
+        select:false
     } ,
     isApproved:{
         type:Boolean ,
@@ -62,7 +63,7 @@ const EmployerSchema = new mongoose.Schema({
   
 } ,  {timestamps:true} )
 EmployerSchema.plugin(paginate)
-EmployerSchema.plugin(aggregatePaginate)
+EmployerSchema.plugin(aggregatePaginate) 
 
 
 export default mongoose.model('Employer'  ,EmployerSchema)

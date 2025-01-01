@@ -49,7 +49,7 @@ export const loginCandidate =async(req , res)=>{
           secure: false,
         })
         .status(StatusCodes.ACCEPTED)
-        .json(buildResponse(StatusCodes.ACCEPTED, {candidate}))
+        .json(buildResponse(StatusCodes.ACCEPTED,candidate))
 
 
 
@@ -58,7 +58,6 @@ export const loginCandidate =async(req , res)=>{
 
     }
 }
-
 
 export const registerCandidate = async(req, res) => {
     try {
@@ -263,9 +262,6 @@ export const getProfile = async (req,res)=>{
     }
 
 }
-
-
-
 
 // extra code
 

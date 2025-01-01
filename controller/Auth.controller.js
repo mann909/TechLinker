@@ -6,9 +6,7 @@ import { matchedData } from 'express-validator';
 import sendMail from '../helpers/sendMail.js';
 import Verifications from '../model/Verifications.schema.js'
 import handleError from '../utils/handleError.js';
-
-
-
+import jwt from 'jsonwebtoken';
 
 
 
@@ -53,11 +51,6 @@ export const sendOtp = async(req , res)=>{
     }
 }
 
-
-
-
-
-
 export const verifyToken = async (req, res) => {
   try {
     const { accessToken, refreshToken } = req.cookies;
@@ -69,22 +62,21 @@ export const verifyToken = async (req, res) => {
 
     console.log(process.env.AUTH_SECRET);
     const decoded = jwt.verify(accessToken, process.env.AUTH_SECRET);
-    const id = decoded._id;
 
-    const user = await Admin.findById(id).select('-password').lean();
-    if (!user) {
-      throw buildErrorObject(StatusCodes.UNAUTHORIZED, 'Session Expired');
+    const user={
+      id:decoded.id,
+      name:decoded.name,
+      role:decoded.role
     }
 
     res
       .status(StatusCodes.ACCEPTED)
-      .json(buildResponse(StatusCodes.ACCEPTED, { user }));
+      .json(buildResponse(StatusCodes.ACCEPTED, user));
   } catch (err) {
     console.log(err);
     handleError(res, err);
   }
 };
-
 
 export const logOut = async(req , res)=>{
     try{
@@ -95,7 +87,7 @@ export const logOut = async(req , res)=>{
            clearCookie('refreshToken' , {httpOnly:true , secure:false})
 
 
-           res.status(StatusCodes.NOT_MODIFIED).send()
+           res.status(StatusCodes.NO_CONTENT).send()
 
     }catch(err){
         handleError(res , err)

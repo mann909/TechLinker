@@ -20,6 +20,7 @@ export const registerEmployer = async(req , res)=>{
             { mobile: mobile }
             ]
         })
+        console.log(email)
 
 
 
@@ -74,8 +75,6 @@ export const registerEmployer = async(req , res)=>{
     }
 }
 
-
-
 export const loginEmployer = async(req , res)=>{
     try{
 
@@ -118,12 +117,48 @@ export const loginEmployer = async(req , res)=>{
           secure: false,
         })
         .status(StatusCodes.ACCEPTED)
-        .json(buildResponse(StatusCodes.ACCEPTED, {employer}))
+        .json(buildResponse(StatusCodes.ACCEPTED, employer))
 
 
 
     }catch(err){
         handleError(res ,err)
 
+    }
+}
+
+export const getEmployerProfile = async(req , res)=>{
+    try{
+        const {id}= req.user
+
+        const employer = await Employer.findById(id).lean()
+
+        if(!employer){
+            throw buildErrorObject(StatusCodes.BAD_REQUEST , 'No Such Employer Found')
+        }
+
+        res
+        .status(StatusCodes.OK)
+        .json(buildResponse(StatusCodes.OK , employer))
+
+    }catch(err){
+        handleError(res , err)
+    }
+}
+
+export const updateEmployerProfile = async(req , res)=>{
+    try{
+        const {id}= req.user
+
+        req =matchedData(req)
+
+        await Employer.findByIdAndUpdate(id, req)
+
+        res
+        .status(StatusCodes.NO_CONTENT)
+        .json(buildResponse(StatusCodes.NO_CONTENT ))
+
+    }catch(err){
+        handleError(res , err)
     }
 }
