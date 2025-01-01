@@ -1,66 +1,55 @@
-import { check } from "express-validator";
-import validateRequest from "../utils/validateRequest.js";
+import { check } from 'express-validator';
+import validateRequest from '../utils/validateRequest.js';
 
-
-export const validateLogin=[
-    check('email')
+export const validateLogin = [
+  check('email')
     .exists()
     .withMessage('Email is Required')
     .not()
     .isEmpty()
-    .withMessage('Email is Required') 
+    .withMessage('Email is Required')
     .isEmail()
-    .withMessage('Email is not valid') ,
-    
+    .withMessage('Email is not valid'),
 
-    check('password')
+  check('password')
     .exists()
     .withMessage('Password Is Required')
     .not()
     .isEmpty()
-    .withMessage('Password  Required') ,
+    .withMessage('Password  Required'),
 
-
-
-    (req , res , next)=>validateRequest(req , res , next)
-
-
-]
+  (req, res, next) => validateRequest(req, res, next),
+];
 
 export const validateRegister = [
-
-
-    check('email')
+  check('email')
     .exists()
     .withMessage('Email is Required')
     .not()
     .isEmpty()
-    .withMessage('Email is Required') 
+    .withMessage('Email is Required')
     .isEmail()
     .withMessage('Email is not valid'),
 
-
-    check('otp')
+  check('otp')
     .exists()
     .withMessage('OTP is Required')
     .not()
-    .isEmpty() 
+    .isEmpty()
     .isLength({ min: 4, max: 4 })
     .withMessage('OTP must be exactly 4 digits')
     .matches(/^[0-9]+$/)
     .withMessage('OTP must contain only numbers'),
 
-
-
-    check('password')
+  check('password')
     .exists()
     .withMessage('Password is Required')
     .not()
     .isEmpty()
     .withMessage('Password is Empty')
-    .isLength({min:8})
+    .isLength({ min: 8 })
     .withMessage('Password length should be atleast 8')
-    .isLength({max:15})
+    .isLength({ max: 15 })
     .withMessage('Password length should be less than 15')
     .matches(/^(?=.*[A-Z])/)
     .withMessage('Password must contain at least one uppercase letter')
@@ -69,7 +58,7 @@ export const validateRegister = [
     .matches(/^(?=.*[!@#$%^&*])/)
     .withMessage('Password must contain at least one special character'),
 
-    check('mobile')
+  check('mobile')
     .exists()
     .withMessage('Mobile Number is Required')
     .not()
@@ -80,114 +69,106 @@ export const validateRegister = [
     .matches(/^[0-9]+$/)
     .withMessage('Mobile number must contain only numbers'),
 
-
-
-    check('website')
+  check('website')
     .exists()
     .withMessage('Website is Required')
     .not()
     .isEmpty()
     .withMessage('Website is Required')
     .matches(/^https:\/\//)
-    .withMessage('Website must start with https://') ,
+    .withMessage('Website must start with https://'),
 
-
-
-    check('state')
+  check('state')
     .exists()
     .withMessage('State is Required')
     .not()
     .isEmpty()
-    .withMessage('State is Empty') ,
+    .withMessage('State is Empty'),
 
-
-    check('city')
+  check('city')
     .exists()
     .withMessage('City is Required')
     .not()
     .isEmpty()
-    .withMessage('City is Empty') ,
-    
-    check('about') 
+    .withMessage('City is Empty'),
+
+  check('about')
     .exists()
     .withMessage('About is Required')
     .not()
     .isEmpty()
-    .withMessage('About is Empty') ,
+    .withMessage('About is Empty'),
 
-    check('orgName') 
+  check('orgName')
     .exists()
     .withMessage('Organisation Name is Required')
     .not()
     .isEmpty()
-    .withMessage('Organisation Name is Required') ,
+    .withMessage('Organisation Name is Required'),
 
-
-    (req , res , next) =>validateRequest(req , res , next)
-    
-
-]
+  (req, res, next) => validateRequest(req, res, next),
+];
 
 export const validateGetEmployerProfile = [
-    (req , res , next) =>validateRequest(req , res , next)
-]
+  (req, res, next) => validateRequest(req, res, next),
+];
 
 export const validateUpdateEmployerProfile = [
-    check('orgName')
-        .exists()
-        .withMessage('Organisation Name is Required')
-        .not()
-        .isEmpty()
-        .withMessage('Organisation Name is Required'),
+  check('orgName')
+    .exists()
+    .withMessage('Organisation Name is Required')
+    .not()
+    .isEmpty()
+    .withMessage('Organisation Name is Required'),
 
-    check('city')
-        .exists()
-        .withMessage('City is Required')
-        .not()
-        .isEmpty()
-        .withMessage('City is Required'),
+  check('city')
+    .exists()
+    .withMessage('City is Required')
+    .not()
+    .isEmpty()
+    .withMessage('City is Required'),
 
-    check('state')
-        .exists()
-        .withMessage('State is Required')
-        .not()
-        .isEmpty()
-        .withMessage('State is Required'),
+  check('state')
+    .exists()
+    .withMessage('State is Required')
+    .not()
+    .isEmpty()
+    .withMessage('State is Required'),
 
-    check('mobile')
-        .exists()
-        .withMessage('Mobile Number is Required')
-        .not()
-        .isEmpty()
-        .withMessage('Mobile Number is Required')
-        .isLength({ min: 10, max: 10 })
-        .withMessage('Mobile number must be exactly 10 digits')
-        .matches(/^[0-9]+$/)
-        .withMessage('Mobile number must contain only numbers'),
+  check('mobile')
+    .exists()
+    .withMessage('Mobile Number is Required')
+    .not()
+    .isEmpty()
+    .withMessage('Mobile Number is Required')
+    .isLength({ min: 10, max: 10 })
+    .withMessage('Mobile number must be exactly 10 digits')
+    .matches(/^[0-9]+$/)
+    .withMessage('Mobile number must contain only numbers'),
 
-    check('email')
-        .exists()
-        .withMessage('Email is Required')
-        .not()
-        .isEmpty()
-        .withMessage('Email is Required')
-        .isEmail()
-        .withMessage('Invalid email format'),
+  check('email')
+    .exists()
+    .withMessage('Email is Required')
+    .not()
+    .isEmpty()
+    .withMessage('Email is Required')
+    .isEmail()
+    .withMessage('Invalid email format'),
 
-    check('website')
-        .exists()
-        .withMessage('Website is Required')
-        .not()
-        .isEmpty()
-        .withMessage('Website is Required')
-        .matches(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/)
-        .withMessage('Invalid website URL'),
+  check('website')
+    .exists()
+    .withMessage('Website is Required')
+    .not()
+    .isEmpty()
+    .withMessage('Website is Required')
+    .matches(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/)
+    .withMessage('Invalid website URL'),
 
-    check('about')
-        .exists()
-        .withMessage('About is Required')
-        .not()
-        .isEmpty()
-        .withMessage('About is Required'),
-    (req , res , next) =>validateRequest(req , res , next)
-]
+  check('about')
+    .exists()
+    .withMessage('About is Required')
+    .not()
+    .isEmpty()
+    .withMessage('About is Required'),
+  (req, res, next) => validateRequest(req, res, next),
+];

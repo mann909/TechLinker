@@ -1,315 +1,277 @@
-import Candidate from '../model/Candidate.schema.js'
+import Candidate from '../model/Candidate.schema.js';
 import buildResponse from '../utils/buildResponse.js';
 import buildErrorObject from '../utils/buildErrorObject.js';
 import handleError from '../utils/handleError.js';
-import { StatusCodes } from 'http-status-codes'
-import bcrypt from 'bcrypt'
+import { StatusCodes } from 'http-status-codes';
+import bcrypt from 'bcrypt';
 import generateTokens from '../utils/generateTokens.js';
 import Profile from '../model/Profile.schema.js';
-import {uploadToCloudinary}  from '../config/cloudinary.js'
+import { uploadToCloudinary } from '../config/cloudinary.js';
 import { matchedData } from 'express-validator';
-import Verifications from '../model/Verifications.schema.js'
+import Verifications from '../model/Verifications.schema.js';
 
-export const loginCandidate =async(req , res)=>{
-    try{
-        const {email , password}= matchedData(req) ;
-      
+export const loginCandidate = async (req, res) => {
+  try {
+    const { email, password } = matchedData(req);
 
-        let candidate = await Candidate.findOne({email:email}).select('+password')
+    let candidate = await Candidate.findOne({ email: email }).select(
+      '+password'
+    );
 
-        if(!candidate){
-            throw buildErrorObject(StatusCodes.BAD_REQUEST , 'No Such User Found')
-        }
-
-        if(candidate.role!=='Candidate'){
-            throw buildErrorObject(StatusCodes.UNAUTHORIZED , 'You are not authorized to login as candidate')
-        }
-
-        if(!await bcrypt.compare(password , candidate.password)){
-            throw buildErrorObject(StatusCodes.BAD_REQUEST , 'Incorrect Password')
-        }
-        const user={
-            id:candidate._id ,
-            role:candidate.role,
-            name:candidate.fullName
-        }
-
-        const {accessToken , refreshToken} = generateTokens(user)
-        console.log(accessToken , refreshToken)
-         candidate = await Candidate.findById(candidate._id).select('-password').lean()
-        
-
-        res
-        .cookie('accessToken', accessToken, {
-          httpOnly: true,
-          secure: false,
-        })
-        .cookie('refreshToken', refreshToken, {
-          httpOnly: true,
-          secure: false,
-        })
-        .status(StatusCodes.ACCEPTED)
-        .json(buildResponse(StatusCodes.ACCEPTED,candidate))
-
-
-
-    }catch(err){
-        handleError(res ,err)
-
+    if (!candidate) {
+      throw buildErrorObject(StatusCodes.BAD_REQUEST, 'No Such User Found');
     }
-}
 
-export const registerCandidate = async(req, res) => {
-    try {
-
-        req=matchedData(req)
-        const { fullName, email, mobile, password , otp} = req;
-        console.log(email)
-        const verification = await Verifications.findOne({
-            email
-          }).lean()
-          console.log(verification)
-          if (!verification) {
-            throw buildErrorObject(
-              StatusCodes.NOT_FOUND,
-              'Verification record not found. Please request a new OTP.'
-            )
-          }
-      
-          if (parseInt(verification.otp) !== parseInt(otp)) {
-            throw buildErrorObject(
-                StatusCodes.BAD_REQUEST,
-              'Invalid OTP. Please enter the correct OTP sent to your email.'
-            )
-          }
-
-    
-        const candidateExists = await Candidate.findOne({ email });
-        if (candidateExists) {
-            throw buildErrorObject(StatusCodes.CONFLICT, 'Candidate Already Exists')
-        }
-
-        const hashedPassword = await bcrypt.hash(password , 10)
-
-        const newCandidate = new Candidate({ fullName, email, mobile, password:hashedPassword });
-        await newCandidate.save();
-
-        const newProfile = await Profile.create({
-            userId: newCandidate._id, 
-        });
-
-        newCandidate.profile = newProfile._id;
-        await newCandidate.save();
-
-        // Send confirmation email
-        // const emailTemplate = generateCandidateEmail(fullName, email, mobile);
-        // await mailSender.sendEmail(email, "Candidate Registration Confirmation", emailTemplate);
-
-        return res
-            .status(StatusCodes.CREATED)
-            .json(buildResponse(StatusCodes.CREATED ,{message:'Candidate Registered'}))
-
-    } catch (err) {
-        handleError(res, err)
+    if (candidate.role !== 'Candidate') {
+      throw buildErrorObject(
+        StatusCodes.UNAUTHORIZED,
+        'You are not authorized to login as candidate'
+      );
     }
-}
+
+    if (!(await bcrypt.compare(password, candidate.password))) {
+      throw buildErrorObject(StatusCodes.BAD_REQUEST, 'Incorrect Password');
+    }
+    const user = {
+      id: candidate._id,
+      role: candidate.role,
+      name: candidate.fullName,
+    };
+
+    const { accessToken, refreshToken } = generateTokens(user);
+    console.log(accessToken, refreshToken);
+    candidate = await Candidate.findById(candidate._id)
+      .select('-password')
+      .lean();
+
+    res
+      .cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: false,
+      })
+      .cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: false,
+      })
+      .status(StatusCodes.ACCEPTED)
+      .json(buildResponse(StatusCodes.ACCEPTED, candidate));
+  } catch (err) {
+    handleError(res, err);
+  }
+};
+
+export const registerCandidate = async (req, res) => {
+  try {
+    req = matchedData(req);
+    const { fullName, email, mobile, password, otp } = req;
+    console.log(email);
+    const verification = await Verifications.findOne({
+      email,
+    }).lean();
+    console.log(verification);
+    if (!verification) {
+      throw buildErrorObject(
+        StatusCodes.NOT_FOUND,
+        'Verification record not found. Please request a new OTP.'
+      );
+    }
+
+    if (parseInt(verification.otp) !== parseInt(otp)) {
+      throw buildErrorObject(
+        StatusCodes.BAD_REQUEST,
+        'Invalid OTP. Please enter the correct OTP sent to your email.'
+      );
+    }
+
+    const candidateExists = await Candidate.findOne({ email });
+    if (candidateExists) {
+      throw buildErrorObject(StatusCodes.CONFLICT, 'Candidate Already Exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newCandidate = new Candidate({
+      fullName,
+      email,
+      mobile,
+      password: hashedPassword,
+    });
+    await newCandidate.save();
+
+    const newProfile = await Profile.create({
+      userId: newCandidate._id,
+    });
+
+    newCandidate.profile = newProfile._id;
+    await newCandidate.save();
+
+    // Send confirmation email
+    // const emailTemplate = generateCandidateEmail(fullName, email, mobile);
+    // await mailSender.sendEmail(email, "Candidate Registration Confirmation", emailTemplate);
+
+    return res
+      .status(StatusCodes.CREATED)
+      .json(
+        buildResponse(StatusCodes.CREATED, { message: 'Candidate Registered' })
+      );
+  } catch (err) {
+    handleError(res, err);
+  }
+};
 
 //this code wont update the user's fullName and mobile number (since email is unchangeable)
 export const updateProfile = async (req, res) => {
-    try {
-        const { id } = req.user;
-        const {
-            //Candidate
-            fullName,
-            mobile,
+  try {
+    const { id } = req.user;
+    const {
+      //Candidate
+      fullName,
+      mobile,
 
-            //Profile
-            subLocation,
-            maritalStatus,
-            dob,
-            gender,
-            language,
-            englishFluency,
-            currentAddress,
-            permanentAddress,
-            panCardNumber,
-            drivingLicenseNumber,
-            passPortNumber,
-            workExperience,
-            currentCompany,
-            previousCompany,
-            course,
-            passingYear,
-            marks,
-            role,
-            subRole,
-            industry,
-            jobType,
-            prefferedLocation
-        } = req.body;
+      //Profile
+      subLocation,
+      maritalStatus,
+      dob,
+      gender,
+      language,
+      englishFluency,
+      currentAddress,
+      permanentAddress,
+      panCardNumber,
+      drivingLicenseNumber,
+      passPortNumber,
+      workExperience,
+      currentCompany,
+      previousCompany,
+      course,
+      passingYear,
+      marks,
+      role,
+      subRole,
+      industry,
+      jobType,
+      prefferedLocation,
+    } = req.body;
 
-        let panCardFileUrl = null;
-        let drivingLicenseFileUrl = null;
-        let passPortFileUrl = null;
-        let resumeFileUrl = null;
+    let panCardFileUrl = null;
+    let drivingLicenseFileUrl = null;
+    let passPortFileUrl = null;
+    let resumeFileUrl = null;
 
-        if (req.files?.panCardFile) {
-            panCardFileUrl = await uploadToCloudinary(req.files.panCardFile[0].path, "documents");
-        }
-        if (req.files?.drivingLicenseFile) {
-            drivingLicenseFileUrl = await uploadToCloudinary(req.files.drivingLicenseFile[0].path, "documents");
-        }
-        if (req.files?.passPortFile) {
-            passPortFileUrl = await uploadToCloudinary(req.files.passPortFile[0].path, "documents");
-        }
-        if (req.files?.resumeFile) {
-            resumeFileUrl = await uploadToCloudinary(req.files.resumeFile[0].path, "documents");
-        }
-
-        let languages = language ? language.split(',') : undefined;
-
-        const profileData = {
-            subLocation,
-            maritalStatus,
-            dob,
-            gender,
-            language: languages,
-            englishFluency,
-            currentAddress,
-            permanentAddress,
-            panCardNumber,
-            panCardFile: panCardFileUrl,
-            drivingLicenseNumber,
-            drivingLicenseFile: drivingLicenseFileUrl,
-            passPortNumber,
-            passPortFile: passPortFileUrl,
-            workExperience,
-            resumeFile: resumeFileUrl,
-            currentCompany,
-            previousCompany,
-            course,
-            passingYear,
-            marks,
-            role,
-            subRole,
-            industry,
-            jobType,
-            prefferedLocation
-        };
-
-        const candidateData = {
-            fullName,
-            mobile,
-        }
-
-        const filteredProfileData = Object.fromEntries(
-            Object.entries(profileData).filter(([_, value]) => value != null)
-        );
-
-        if (Object.keys(filteredProfileData).length > 0) {
-            filteredProfileData.isProfileCompleted = true;
-        }
-
-        const filteredCandidateData = Object.fromEntries(
-            Object.entries(candidateData).filter(([_, value]) => value != null)
-        )
-
-
-
-        const updatedProfile = await Profile.findOneAndUpdate(
-            { userId:id },
-            filteredProfileData,
-            { new: true } ,
-            {upsert:true}
-        ).lean();
-
-        const updatedCandidate = await Candidate.findByIdAndUpdate(
-            id,
-            filteredCandidateData,
-            { new: true } ,
-        ).lean()
-
-        res
-            .status(StatusCodes.OK)
-            .json(buildResponse(StatusCodes.OK, 
-                {candidate:
-                    {...updatedProfile,
-                        fullName:updatedCandidate.fullName,
-                        mobile:updatedCandidate.mobile,
-                    }
-                })
-            );
-
-    } catch (err) {
-        console.log(err)
-        handleError(res, err);
+    if (req.files?.panCardFile) {
+      panCardFileUrl = await uploadToCloudinary(
+        req.files.panCardFile[0].path,
+        'documents'
+      );
     }
-}
-
-export const getProfile = async (req,res)=>{
-    try {
-        const { id } = req.user
-
-        const profile = await Candidate.findById(id).populate('profile')
-
-        res
-        .status(StatusCodes.OK)
-        .json(buildResponse(StatusCodes.OK, profile));
-
-    } catch (err) {
-        console.log(err)
-        handleError(res, err);
+    if (req.files?.drivingLicenseFile) {
+      drivingLicenseFileUrl = await uploadToCloudinary(
+        req.files.drivingLicenseFile[0].path,
+        'documents'
+      );
+    }
+    if (req.files?.passPortFile) {
+      passPortFileUrl = await uploadToCloudinary(
+        req.files.passPortFile[0].path,
+        'documents'
+      );
+    }
+    if (req.files?.resumeFile) {
+      resumeFileUrl = await uploadToCloudinary(
+        req.files.resumeFile[0].path,
+        'documents'
+      );
     }
 
-}
+    let languages = language ? language.split(',') : undefined;
 
-// extra code
+    const profileData = {
+      subLocation,
+      maritalStatus,
+      dob,
+      gender,
+      language: languages,
+      englishFluency,
+      currentAddress,
+      permanentAddress,
+      panCardNumber,
+      panCardFile: panCardFileUrl,
+      drivingLicenseNumber,
+      drivingLicenseFile: drivingLicenseFileUrl,
+      passPortNumber,
+      passPortFile: passPortFileUrl,
+      workExperience,
+      resumeFile: resumeFileUrl,
+      currentCompany,
+      previousCompany,
+      course,
+      passingYear,
+      marks,
+      role,
+      subRole,
+      industry,
+      jobType,
+      prefferedLocation,
+    };
 
-// const requiredFields = [
-//     'subLocation',
-//     'maritalStatus',
-//     'dob',
-//     'gender',
-//     'language',
-//     'englishFluency',
-//     'currentAddress',
-//     'permanentAddress',
-//     'workExperience',
-//     'currentCompany',
-//     'previousCompany',
-//     'course',
-//     'passingYear',
-//     'marks',
-//     'role',
-//     'subRole',
-//     'industry',
-//     'jobType',
-//     'prefferedLocation'
-// ];
+    const candidateData = {
+      fullName,
+      mobile,
+    };
 
-// const allFieldsFilled = requiredFields.every(field => profileData[field] != null && profileData[field] !== '');
+    const filteredProfileData = Object.fromEntries(
+      Object.entries(profileData).filter(([_, value]) => value != null)
+    );
 
-// const documentFields = [
-//     {
-//     number: profileData.panCardNumber,
-//     file: profileData.panCardFile
-//     },
-//     {
-//     number: profileData.drivingLicenseNumber,
-//     file: profileData.drivingLicenseFile
-//     },
-//     {
-//     number: profileData.passPortNumber,
-//     file: profileData.passPortFile
-//     }
-// ];
+    if (Object.keys(filteredProfileData).length > 0) {
+      filteredProfileData.isProfileCompleted = true;
+    }
+
+    const filteredCandidateData = Object.fromEntries(
+      Object.entries(candidateData).filter(([_, value]) => value != null)
+    );
+
+    const updatedProfile = await Profile.findOneAndUpdate(
+      { userId: id },
+      filteredProfileData,
+      { new: true },
+      { upsert: true }
+    ).lean();
+
+    const updatedCandidate = await Candidate.findByIdAndUpdate(
+      id,
+      filteredCandidateData,
+      { new: true }
+    ).lean();
+
+    res
+      .status(StatusCodes.OK)
+      .json(
+        buildResponse(StatusCodes.OK, {
+          candidate: {
+            ...updatedProfile,
+            fullName: updatedCandidate.fullName,
+            mobile: updatedCandidate.mobile,
+          },
+        })
+      );
+  } catch (err) {
+    console.log(err);
+    handleError(res, err);
+  }
+};
+
+export const getProfile = async (req, res) => {
+  try {
+    const { id } = req.user;
+
+    const profile = await Candidate.findById(id).populate('profile');
+
+    res.status(StatusCodes.OK).json(buildResponse(StatusCodes.OK, profile));
+  } catch (err) {
+    console.log(err);
+    handleError(res, err);
+  }
+};
 
 
-
-// const atLeastOneDocumentPresent = documentFields.some(field => field.number != null && field.number !== '' && field.file != null && field.file !== '');
-
-// if (!allFieldsFilled || !atLeastOneDocumentPresent) {
-//     throw buildErrorObject(StatusCodes.BAD_REQUEST, 'All required fields must be filled and at least one document must be present');
-// }else{
-//     profileData.isProfileCompleted = true
-// }

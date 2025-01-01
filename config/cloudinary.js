@@ -4,13 +4,12 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
 import { configDotenv } from 'dotenv';
 
-configDotenv()
-
+configDotenv();
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET
+  api_secret: process.env.API_SECRET,
 });
 
 const storage = new CloudinaryStorage({
@@ -18,8 +17,8 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'TechLink',
     resource_type: 'auto',
-    public_id: (req, file) => Date.now() + '-' + file.originalname
-  }
+    public_id: (req, file) => Date.now() + '-' + file.originalname,
+  },
 });
 
 const upload = multer({ storage: storage });
@@ -37,4 +36,4 @@ const uploadToCloudinary = (filePath, folder = 'TechLink') => {
   });
 };
 
-export   { upload, uploadToCloudinary };
+export { upload, uploadToCloudinary };

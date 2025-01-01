@@ -1,32 +1,19 @@
-import express from 'express'
-import * as authController from '../controller/Auth.controller.js'
-import * as authValidators from '../validators/auth.validators.js'
-import trimRequest from 'trim-request'
+import express from 'express';
+import * as authController from '../controller/Auth.controller.js';
+import * as authValidators from '../validators/auth.validators.js';
+import trimRequest from 'trim-request';
 
+const router = express.Router();
 
-const router = express.Router()
+router.get('/verify-token', authController.verifyToken);
 
-
-
-
-router.get('/verify-token', 
-    authController.verifyToken
-);
-
-
-router.delete(
-    '/logout' ,
-    authController.logOut
-)
-
+router.delete('/logout', authController.logOut);
 
 router.post(
-    '/send-otp', 
-    trimRequest.all,
-    authValidators.sendOtpValidator,
-    authController.sendOtp
-)
+  '/send-otp',
+  trimRequest.all,
+  authValidators.sendOtpValidator,
+  authController.sendOtp
+);
 
-export default  router
-
-
+export default router;

@@ -1,5 +1,5 @@
-import mongoose from 'mongoose'
-import paginate from 'mongoose-paginate-v2'
+import mongoose from 'mongoose';
+import paginate from 'mongoose-paginate-v2';
 
 const VerificationsSchema = new mongoose.Schema(
   {
@@ -17,7 +17,6 @@ const VerificationsSchema = new mongoose.Schema(
     timestamps: true,
     collection: 'Verifications',
   }
-)
+);
 
-
-export default mongoose.model('Verifications', VerificationsSchema)
+export default mongoose.model('Verifications', VerificationsSchema);

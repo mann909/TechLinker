@@ -1,34 +1,33 @@
-import { check } from "express-validator"
+import { check } from 'express-validator';
 
-import validateRequest from "../utils/validateRequest.js"
-
+import validateRequest from '../utils/validateRequest.js';
 
 export const validateRegister = [
-    check('fullName')
+  check('fullName')
     .exists()
     .withMessage('Name is Required')
     .not()
     .isEmpty()
-    .withMessage('Name is Required') ,
+    .withMessage('Name is Required'),
 
-    check('email')
+  check('email')
     .exists()
     .withMessage('Email is Required')
     .not()
     .isEmpty()
-    .withMessage('Email is Required') 
+    .withMessage('Email is Required')
     .isEmail()
     .withMessage('Email is not valid'),
 
-    check('password')
+  check('password')
     .exists()
     .withMessage('Password is Required')
     .not()
     .isEmpty()
     .withMessage('Password is Empty')
-    .isLength({min:8})
+    .isLength({ min: 8 })
     .withMessage('Password length should be atleast 8')
-    .isLength({max:15})
+    .isLength({ max: 15 })
     .withMessage('Password length should be less than 15')
     .matches(/^(?=.*[A-Z])/)
     .withMessage('Password must contain at least one uppercase letter')
@@ -37,7 +36,7 @@ export const validateRegister = [
     .matches(/^(?=.*[!@#$%^&*])/)
     .withMessage('Password must contain at least one special character'),
 
-    check('mobile')
+  check('mobile')
     .exists()
     .withMessage('Mobile Number is Required')
     .not()
@@ -48,39 +47,35 @@ export const validateRegister = [
     .matches(/^[0-9]+$/)
     .withMessage('Mobile number must contain only numbers'),
 
-
-    check('otp')
+  check('otp')
     .exists()
     .withMessage('OTP is Required')
     .not()
-    .isEmpty() 
+    .isEmpty()
     .isLength({ min: 4, max: 4 })
     .withMessage('OTP must be exactly 10 digits')
     .matches(/^[0-9]+$/)
     .withMessage('OTP must contain only numbers'),
 
-    (req , res , next) => validateRequest(req , res , next)
-]
+  (req, res, next) => validateRequest(req, res, next),
+];
 
-
-export const validateLogin=[
-    check('email')
+export const validateLogin = [
+  check('email')
     .exists()
     .withMessage('Email is Required')
     .not()
     .isEmpty()
-    .withMessage('Email is Required') 
+    .withMessage('Email is Required')
     .isEmail()
     .withMessage('Email is not valid'),
 
-    check('password')
+  check('password')
     .exists()
     .withMessage('Password Is Required')
     .not()
     .isEmpty()
-    .withMessage('Password  Required') ,
+    .withMessage('Password  Required'),
 
-    (req , res , next)=>validateRequest(req , res , next)
-
-
-]
+  (req, res, next) => validateRequest(req, res, next),
+];
