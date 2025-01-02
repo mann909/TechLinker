@@ -7,7 +7,7 @@ import buildResponse from '../utils/buildResponse.js';
 import Verifications from '../model/Verifications.schema.js';
 import { matchedData } from 'express-validator';
 import generateTokens from '../utils/generateTokens.js';
-import Applications from '../model/Applications.schema.js';
+
 
 export const registerEmployer = async (req, res) => {
   try {
@@ -182,55 +182,3 @@ export const updateEmployerProfile = async (req, res) => {
   }
 };
 
-
-
-
-
-
-export const getApplicationsDetails = async(req , res)=>{
-  try{
-
-    const aggregation = [
-
-     { $match:{
-        employerId: req.user.id
-      },
-    } ,
-    {
-      $group:{
-        _id: "$jobId",
-        count: { $sum: 1 }
-      }
-    } ,
-    {
-      $lookup:{
-        from: "jobs",
-        localField: "jobId",
-        foreignField: "_id",
-        as: "job"
-      }
-    },
-
-    {
-      $unwind: "$job"
-    },
-    {
-      $project:{
-        jobName: "$job.post",
-        count: 1
-      }
-    }
-  
-    ]
-
-    const applications = await Applications.aggregate(aggregation);
-
-    res.status(StatusCodes.OK).json(buildResponse(StatusCodes.OK,applications));
-
-
-
-
-  }catch(err){
-    handleError(res,err);
-  }
-}

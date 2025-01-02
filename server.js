@@ -42,7 +42,7 @@ app.use(
     allowedHeaders: 'Content-Type',
     credentials: true,
     methods: ['POST', 'GET', 'PATCH', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'],
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL
   })
 );
 

@@ -9,6 +9,7 @@ import { matchedData } from 'express-validator';
 
 export const listJob = async (req, res) => {
   try {
+    const organisationId = req.user.id;
     req = matchedData(req);
 
     const {
@@ -22,7 +23,6 @@ export const listJob = async (req, res) => {
       minExperience
     } = req;
 
-    const organisationId = req.user.id;
     const employer = await Employer.findById(organisationId);
     if (!employer) {
       throw buildErrorObject(StatusCodes.BAD_REQUEST, 'No Organisation Found');
@@ -53,6 +53,7 @@ export const listJob = async (req, res) => {
       .status(StatusCodes.CREATED)
       .json(buildResponse(StatusCodes.CREATED, { job: newJob }));
   } catch (err) {
+    console.log(err)
     handleError(res, err);
   }
 };
@@ -313,6 +314,7 @@ export const searchJobs = async (req, res) => {
           isApproved: 1,
           createdAt: 1,
           applied: 1,
+          minExperience: 1,
           debugInfo: 1,  // Keep this for debugging
           'organisationDetails.orgName': 1,
           'organisationDetails.city': 1,
