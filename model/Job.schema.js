@@ -44,12 +44,12 @@ const JobModel = new mongoose.Schema(
       required: true,
     },
 
-    minExperience:{
+    minExperience: {
       type: String,
       required: true,
-      default:'0'
-    } ,
-  
+      default: '0',
+    },
+
     status: {
       type: String,
       default: 'pending',

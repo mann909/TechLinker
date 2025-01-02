@@ -244,17 +244,15 @@ export const updateProfile = async (req, res) => {
       { new: true }
     ).lean();
 
-    res
-      .status(StatusCodes.OK)
-      .json(
-        buildResponse(StatusCodes.OK, {
-          candidate: {
-            ...updatedProfile,
-            fullName: updatedCandidate.fullName,
-            mobile: updatedCandidate.mobile,
-          },
-        })
-      );
+    res.status(StatusCodes.OK).json(
+      buildResponse(StatusCodes.OK, {
+        candidate: {
+          ...updatedProfile,
+          fullName: updatedCandidate.fullName,
+          mobile: updatedCandidate.mobile,
+        },
+      })
+    );
   } catch (err) {
     console.log(err);
     handleError(res, err);
@@ -273,4 +271,3 @@ export const getProfile = async (req, res) => {
     handleError(res, err);
   }
 };
-

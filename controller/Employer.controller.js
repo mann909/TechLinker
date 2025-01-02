@@ -8,7 +8,6 @@ import Verifications from '../model/Verifications.schema.js';
 import { matchedData } from 'express-validator';
 import generateTokens from '../utils/generateTokens.js';
 
-
 export const registerEmployer = async (req, res) => {
   try {
     req = matchedData(req);
@@ -28,7 +27,6 @@ export const registerEmployer = async (req, res) => {
     const existingOrganisation = await Employer.findOne({
       $or: [{ website: website }, { mobile: mobile }],
     });
-
 
     if (existingOrganisation) {
       throw buildErrorObject(
@@ -55,7 +53,6 @@ export const registerEmployer = async (req, res) => {
       );
     }
 
-   
     if (
       !orgName ||
       !city ||
@@ -181,4 +178,3 @@ export const updateEmployerProfile = async (req, res) => {
     handleError(res, err);
   }
 };
-

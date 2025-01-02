@@ -19,7 +19,6 @@ router.get(
   trimRequest.all,
   jobValidator.validateJobSearch,
   jobController.searchJobs
-)
-
+);
 
 export default router;

@@ -9,7 +9,6 @@ import cookieParser from 'cookie-parser';
 import v1 from './routes/routes.js';
 import init from './config/mongo.js';
 
-
 dotenv.config();
 
 const morganFormat = ':method :url :status :response-time ms';
@@ -42,7 +41,7 @@ app.use(
     allowedHeaders: 'Content-Type',
     credentials: true,
     methods: ['POST', 'GET', 'PATCH', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'],
-    origin: process.env.FRONTEND_URL
+    origin: ['http://localhost:3000' ,'http://192.168.1.6:3000'],
   })
 );
 

@@ -13,12 +13,21 @@ router.post(
   applicationController.createApplication
 );
 
-// router.get(
-//     '/get-applications',
-//     auth,
-//     trimRequest.all,
-//     applicationController.getApplicationsDetails
-//     );
+router.get(
+  '/job-applicants',
+  auth,
+  trimRequest.all,
+  applicationValidator.getApplicationsValidator ,
+  applicationController.getApplicationsDetails
+);
 
+
+router.get(
+  '/job-applicants-details' ,
+  auth ,
+  trimRequest.all , 
+  applicationValidator.getJobApplicantsDetailsValidator ,
+  applicationController.getJobApplicantsDetails
+)
 
 export default router;

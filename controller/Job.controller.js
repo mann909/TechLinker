@@ -20,7 +20,7 @@ export const listJob = async (req, res) => {
       description,
       employmentType,
       hiringProcess,
-      minExperience
+      minExperience,
     } = req;
 
     const employer = await Employer.findById(organisationId);
@@ -32,8 +32,6 @@ export const listJob = async (req, res) => {
       throw buildErrorObject(StatusCodes.UNAUTHORIZED, 'You are Unauthorized');
     }
 
-  
-
     const newJob = await Job.create({
       organisation: employer._id,
       post,
@@ -43,7 +41,7 @@ export const listJob = async (req, res) => {
       description,
       employmentType,
       hiringProcess,
-      minExperience
+      minExperience,
     });
 
     employer.jobs.push(newJob._id);
@@ -53,7 +51,7 @@ export const listJob = async (req, res) => {
       .status(StatusCodes.CREATED)
       .json(buildResponse(StatusCodes.CREATED, { job: newJob }));
   } catch (err) {
-    console.log(err)
+    console.log(err);
     handleError(res, err);
   }
 };
@@ -168,8 +166,6 @@ export const listJob = async (req, res) => {
 //   }
 // }
 
-
-
 export const searchJobs = async (req, res) => {
   try {
     const queryData = matchedData(req);
@@ -183,10 +179,8 @@ export const searchJobs = async (req, res) => {
       state,
     } = queryData;
 
-    
     const candidateId = new mongoose.Types.ObjectId(req.user.id);
 
-   
     const matchFilter = {
       isApproved: true,
     };
@@ -253,15 +247,15 @@ export const searchJobs = async (req, res) => {
       // Add a stage to see the job IDs for debugging
       {
         $addFields: {
-          debugJobId: { $toString: '$_id' }
-        }
+          debugJobId: { $toString: '$_id' },
+        },
       },
       {
         $lookup: {
-          from: 'applications',  
-          let: { 
+          from: 'applications',
+          let: {
             jobId: '$_id',
-            debug_job_string: { $toString: '$_id' }
+            debug_job_string: { $toString: '$_id' },
           },
           pipeline: [
             {
@@ -272,23 +266,20 @@ export const searchJobs = async (req, res) => {
                       $eq: [
                         '$jobId',
                         {
-                          $toObjectId: '$$debug_job_string'
-                        }
-                      ]
+                          $toObjectId: '$$debug_job_string',
+                        },
+                      ],
                     },
                     {
-                      $eq: [
-                        '$candidateId',
-                        candidateId
-                      ]
-                    }
-                  ]
-                }
-              }
-            }
+                      $eq: ['$candidateId', candidateId],
+                    },
+                  ],
+                },
+              },
+            },
           ],
-          as: 'applicationStatus'
-        }
+          as: 'applicationStatus',
+        },
       },
       // Add debug information
       {
@@ -298,9 +289,9 @@ export const searchJobs = async (req, res) => {
             applicationCount: { $size: '$applicationStatus' },
             applications: '$applicationStatus',
             currentJobId: '$_id',
-            currentCandidateId: candidateId
-          }
-        }
+            currentCandidateId: candidateId,
+          },
+        },
       },
       {
         $project: {
@@ -315,7 +306,7 @@ export const searchJobs = async (req, res) => {
           createdAt: 1,
           applied: 1,
           minExperience: 1,
-          debugInfo: 1,  // Keep this for debugging
+          debugInfo: 1, // Keep this for debugging
           'organisationDetails.orgName': 1,
           'organisationDetails.city': 1,
           'organisationDetails.state': 1,
@@ -341,34 +332,43 @@ export const applyForJob = async (req, res) => {
     const { jobId } = req.params;
     const candidateId = req.user.id;
 
-   
     const job = await Job.findById(jobId);
     if (!job) {
-      return res.status(StatusCodes.NOT_FOUND)
-        .json(buildResponse(StatusCodes.NOT_FOUND, { message: 'Job not found' }));
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json(
+          buildResponse(StatusCodes.NOT_FOUND, { message: 'Job not found' })
+        );
     }
 
-   
     const existingApplication = await Applications.findOne({
       jobId,
-      candidateId
+      candidateId,
     });
 
     if (existingApplication) {
-      return res.status(StatusCodes.BAD_REQUEST)
-        .json(buildResponse(StatusCodes.BAD_REQUEST, { message: 'Already applied to this job' }));
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json(
+          buildResponse(StatusCodes.BAD_REQUEST, {
+            message: 'Already applied to this job',
+          })
+        );
     }
 
-   
     await Applications.create({
       candidateId,
       jobId,
-      employerId: job.organisation 
+      employerId: job.organisation,
     });
 
-    res.status(StatusCodes.CREATED)
-      .json(buildResponse(StatusCodes.CREATED, { message: 'Application submitted successfully' }));
-
+    res
+      .status(StatusCodes.CREATED)
+      .json(
+        buildResponse(StatusCodes.CREATED, {
+          message: 'Application submitted successfully',
+        })
+      );
   } catch (err) {
     handleError(res, err);
   }
