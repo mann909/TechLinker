@@ -1,4 +1,4 @@
-import { check, query } from 'express-validator';
+import { check, query, param } from 'express-validator';
 import validateRequest from '../utils/validateRequest.js';
 
 export const listJobValidator = [
@@ -67,4 +67,15 @@ export const validateJobSearch = [
     .withMessage('Search term must be a string'),
 
   (req, res, next) => validateRequest(req, res, next),
+];
+
+export const deleteJobValidator = [
+  param('jobId')
+    .exists()
+    .withMessage('Job ID is Required')
+    .not()
+    .isEmpty()
+    .withMessage('Job ID is Required'),
+
+  (req, res, next) => validateRequest(req, res, next)
 ];

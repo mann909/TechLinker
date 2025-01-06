@@ -21,7 +21,6 @@ router.get(
   applicationController.getApplicationsDetails
 );
 
-
 router.get(
   '/job-applicants-details' ,
   auth ,

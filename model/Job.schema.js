@@ -57,6 +57,7 @@ const JobModel = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
 JobModel.plugin(paginate);
 JobModel.plugin(aggregatePaginate);
 

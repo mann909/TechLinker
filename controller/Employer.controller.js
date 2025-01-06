@@ -169,7 +169,11 @@ export const updateEmployerProfile = async (req, res) => {
 
     req = matchedData(req);
 
-    await Employer.findByIdAndUpdate(id, req);
+    const employer = await Employer.findByIdAndUpdate(id, req);
+
+    if (!employer) {
+      throw buildErrorObject(StatusCodes.BAD_REQUEST, 'No Such Employer Found');
+    }
 
     res
       .status(StatusCodes.NO_CONTENT)

@@ -1,5 +1,6 @@
 import Job from '../model/Job.schema.js';
 import Employer from '../model/Employer.schema.js';
+import Applications from '../model/Application.schema.js';
 import mongoose from 'mongoose';
 import buildErrorObject from '../utils/buildErrorObject.js';
 import { StatusCodes } from 'http-status-codes';
@@ -197,11 +198,11 @@ export const searchJobs = async (req, res) => {
     if (search) {
       searchFilter.push(
         { description: { $regex: search, $options: 'i' } },
-        { 'organisationDetails.orgName': { $regex: search, $options: 'i' } }
+        { post: { $regex: search, $options: 'i' } },
+      
       );
     }
 
-    // Modified pipeline with debugging logs
     const pipeline = [
       {
         $lookup: {
@@ -244,35 +245,17 @@ export const searchJobs = async (req, res) => {
           ...(searchFilter.length && { $or: searchFilter }),
         },
       },
-      // Add a stage to see the job IDs for debugging
-      {
-        $addFields: {
-          debugJobId: { $toString: '$_id' },
-        },
-      },
       {
         $lookup: {
           from: 'applications',
-          let: {
-            jobId: '$_id',
-            debug_job_string: { $toString: '$_id' },
-          },
+          let: { jobId: '$_id' },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    {
-                      $eq: [
-                        '$jobId',
-                        {
-                          $toObjectId: '$$debug_job_string',
-                        },
-                      ],
-                    },
-                    {
-                      $eq: ['$candidateId', candidateId],
-                    },
+                    { $eq: ['$jobId', '$$jobId'] },
+                    { $eq: ['$candidateId', candidateId] },
                   ],
                 },
               },
@@ -281,16 +264,9 @@ export const searchJobs = async (req, res) => {
           as: 'applicationStatus',
         },
       },
-      // Add debug information
       {
         $addFields: {
           applied: { $gt: [{ $size: '$applicationStatus' }, 0] },
-          debugInfo: {
-            applicationCount: { $size: '$applicationStatus' },
-            applications: '$applicationStatus',
-            currentJobId: '$_id',
-            currentCandidateId: candidateId,
-          },
         },
       },
       {
@@ -306,7 +282,6 @@ export const searchJobs = async (req, res) => {
           createdAt: 1,
           applied: 1,
           minExperience: 1,
-          debugInfo: 1, // Keep this for debugging
           'organisationDetails.orgName': 1,
           'organisationDetails.city': 1,
           'organisationDetails.state': 1,
@@ -314,12 +289,8 @@ export const searchJobs = async (req, res) => {
       },
     ];
 
-    // Execute the pipeline
     const jobs = await Job.aggregate(pipeline);
 
-    // Add some console logs for debugging
-
-    // Return the response
     res.status(StatusCodes.OK).json(buildResponse(StatusCodes.OK, { jobs }));
   } catch (err) {
     console.error('Pipeline error:', err);
@@ -372,4 +343,41 @@ export const applyForJob = async (req, res) => {
   } catch (err) {
     handleError(res, err);
   }
+};
+
+export const deleteJob = async (req,res)=>{
+  try{
+    const{ id } = req.user
+
+    req=matchedData(req)
+    const {jobId} = req;
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      throw buildErrorObject(StatusCodes.BAD_REQUEST, 'No Job Found');
+    }
+    const employer = await Employer.findById(id);
+
+    if (!employer) {
+      throw buildErrorObject(StatusCodes.BAD_REQUEST, 'No Organisation Found');
+    }
+
+    if (employer.status !== 'approved') {
+      throw buildErrorObject(StatusCodes.UNAUTHORIZED, 'You are Unauthorized');
+    }
+
+    if(job.organisation.toString() !== employer._id.toString()){
+      throw buildErrorObject(StatusCodes.UNAUTHORIZED, 'You are Unauthorized');
+    }
+
+    await Job.deleteOne({ _id: jobId });
+    await Applications.deleteMany({ jobId });
+    res
+      .status(StatusCodes.OK)
+      .json(buildResponse(StatusCodes.OK, { message: 'Job Deleted' }));
+
+    } catch (err) {
+      console.log("Error while deleting Job : ",err);
+      handleError(res, err);
+    }
 };

@@ -36,7 +36,7 @@ export const sendOtp = async (req, res) => {
       { upsert: true, new: true }
     );
 
-    res
+    return res
       .status(StatusCodes.OK)
       .json(buildResponse(StatusCodes.OK, 'OTP Sent Successfully'));
   } catch (err) {
@@ -62,7 +62,7 @@ export const verifyToken = async (req, res) => {
       role: decoded.role,
     };
 
-    res
+    return res
       .status(StatusCodes.ACCEPTED)
       .json(buildResponse(StatusCodes.ACCEPTED, user));
   } catch (err) {
@@ -76,7 +76,7 @@ export const logOut = async (req, res) => {
     res.clearCookie('accessToken', { httpOnly: true, secure: false });
     res.clearCookie('refreshToken', { httpOnly: true, secure: false });
 
-    res.status(StatusCodes.NO_CONTENT).send();
+    return res.status(StatusCodes.NO_CONTENT).send();
   } catch (err) {
     handleError(res, err);
   }

@@ -36,6 +36,7 @@ export const getJobApplicantsDetailsValidator = [
     .not()
     .isEmpty()
     .withMessage('Job ID is Required'),
+    
   query('search')
     .optional(),
   query('page')

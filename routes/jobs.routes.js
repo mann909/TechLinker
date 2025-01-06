@@ -21,4 +21,12 @@ router.get(
   jobController.searchJobs
 );
 
+router.delete(
+  '/delete-job/:jobId',
+  auth,
+  trimRequest.all,
+  jobValidator.deleteJobValidator,
+  jobController.deleteJob
+);
+
 export default router;
