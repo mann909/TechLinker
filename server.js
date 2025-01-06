@@ -41,7 +41,7 @@ app.use(
     allowedHeaders: 'Content-Type',
     credentials: true,
     methods: ['POST', 'GET', 'PATCH', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'],
-    origin: ['http://localhost:3000' ,'http://192.168.1.6:3000'],
+    origin: process.env.FRONTEND_URL,
   })
 );
 
